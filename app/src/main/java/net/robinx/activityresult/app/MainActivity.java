@@ -24,8 +24,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
+                Intent intent = OtherActivity.getIntent(MainActivity.this);
                 ActivityResult.with(MainActivity.this)
-                        .request(OtherActivity.getIntent(MainActivity.this), 100, new Function3<Integer, Integer, Intent, Unit>() {
+                        .request(intent, 100, new Function3<Integer, Integer, Intent, Unit>() {
                             @Override
                             public Unit invoke(Integer requestCode, Integer resultCode, Intent intent) {
                                 if (intent != null) {
@@ -42,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.btn_kotlin_test).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(MainActivity.this,KtMainActivity.class));
+                startActivity(new Intent(MainActivity.this, KtMainActivity.class));
             }
         });
     }

@@ -11,7 +11,7 @@ import net.robinx.activityresult.ActivityResult
  * Email: robinxdroid@gmail.com <br>
  * Blog: http://robinx.net/
  */
-class KtMainActivity:AppCompatActivity() {
+class KtMainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -19,9 +19,10 @@ class KtMainActivity:AppCompatActivity() {
 
         val tvReturn = findViewById<TextView>(R.id.tv_return)
 
-        findViewById<Button>(R.id.btn_go).setOnClickListener{
+        findViewById<Button>(R.id.btn_go).setOnClickListener {
+            val intent = OtherActivity.getIntent(this@KtMainActivity)
             ActivityResult.with(this@KtMainActivity)
-                    .request(OtherActivity.getIntent(this@KtMainActivity)) { _, _, intent ->
+                    .request(intent) { _, _, intent ->
                         intent?.let {
                             val data = intent.getStringExtra("data")
                             tvReturn.text = data
