@@ -8,7 +8,7 @@
             val intent = OtherActivity.getIntent(this@KtMainActivity)
 
             ActivityResult.with(this@KtMainActivity)
-                    .request(intent) { _, _, intent ->
+                    .start(intent) { _, _, intent ->
                         intent?.let {
                             val data = intent.getStringExtra("data")
                             tvReturn.text = data
@@ -21,7 +21,7 @@
                 Intent intent = OtherActivity.getIntent(MainActivity.this);
 
                 ActivityResult.with(MainActivity.this)
-                        .request(intent, 100, new Function3<Integer, Integer, Intent, Unit>() {
+                        .start(intent, 100, new Function3<Integer, Integer, Intent, Unit>() {
                             @Override
                             public Unit invoke(Integer requestCode, Integer resultCode, Intent intent) {
                                 if (intent != null) {
