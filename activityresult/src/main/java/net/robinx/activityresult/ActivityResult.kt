@@ -1,65 +1,84 @@
 package net.robinx.activityresult
 
-import android.app.Activity
-import android.app.Fragment
 import android.content.Intent
+import android.os.Bundle
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
 
 /**
  * Created by Robin on 2019-07-02. <br>
  * Email: robinxdroid@gmail.com <br>
  * Blog: http://robinx.net/
  */
-class ActivityResult(activity: Activity) {
-    private var activityResultFragment: ActivityResultFragment
-
-    init {
-        activityResultFragment = getActivityResultFragment(activity)
+class ActivityResult(activity: FragmentActivity) {
+    private val activityResultFragment: ActivityResultFragment by lazy {
+        getActivityResultFragment(activity)
     }
 
     companion object {
         @JvmStatic
-        fun with(activity: Activity): ActivityResult {
+        fun with(activity: FragmentActivity): ActivityResult {
             return ActivityResult(activity)
         }
     }
 
-    private fun getActivityResultFragment(activity: Activity): ActivityResultFragment {
-        var activityResultFragment: ActivityResultFragment? = findActivityResultFragment(activity)
-        val isNewInstance = activityResultFragment == null
+    private fun getActivityResultFragment(activity: FragmentActivity): ActivityResultFragment {
+        var fragment: ActivityResultFragment? = findActivityResultFragment(activity)
+        val isNewInstance = fragment == null
         if (isNewInstance) {
-            activityResultFragment = ActivityResultFragment()
-            val fragmentManager = activity.fragmentManager
+            fragment = ActivityResultFragment()
+            val fragmentManager = activity.supportFragmentManager
             fragmentManager
-                    .beginTransaction()
-                    .add(activityResultFragment, ActivityResultFragment::class.java.name)
-                    .commitAllowingStateLoss()
+                .beginTransaction()
+                .add(fragment, ActivityResultFragment::class.java.name)
+                .commitAllowingStateLoss()
             fragmentManager.executePendingTransactions()
         }
-        return activityResultFragment!!
+        return fragment!!
     }
 
-    private fun findActivityResultFragment(activity: Activity): ActivityResultFragment? {
-        val fragment: Fragment? = activity.fragmentManager.findFragmentByTag(ActivityResultFragment::class.java.name)
+    private fun findActivityResultFragment(activity: FragmentActivity): ActivityResultFragment? {
+        val fragment: Fragment? = activity.supportFragmentManager.findFragmentByTag(ActivityResultFragment::class.java.name)
         fragment?.let {
             return fragment as ActivityResultFragment
         }
         return null
     }
 
-    fun request(intent: Intent?,
-                requestCode: Int = ActivityResultFragment.defaultRequestCode,
-                poster: ((requestCode: Int, resultCode: Int, data: Intent?) -> Unit)? = null) {
-        intent?.let {
-            requestFromFragment(intent, requestCode, poster)
-        }
+    fun start(intent: Intent,
+              requestCode: Int = ActivityResultFragment.defaultRequestCode,
+              poster: ((requestCode: Int, resultCode: Int, data: Intent?) -> Unit)? = null) = requestFromFragment(intent, requestCode, poster)
 
-    }
 
     private fun requestFromFragment(intent: Intent,
                                     requestCode: Int = ActivityResultFragment.defaultRequestCode,
                                     poster: ((requestCode: Int, resultCode: Int, data: Intent?) -> Unit)? = null) {
         activityResultFragment.poster = poster
         activityResultFragment.openForResult(intent, requestCode)
+    }
+}
+
+class ActivityResultFragment : Fragment() {
+    companion object {
+        const val defaultRequestCode = 0
+    }
+
+    var poster: ((requestCode: Int, resultCode: Int, data: Intent?) -> Unit)? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        retainInstance = true
+    }
+
+    fun openForResult(targetIntent: Intent, requestCode: Int = defaultRequestCode) {
+        this.startActivityForResult(targetIntent, requestCode)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        poster?.let {
+            poster?.invoke(requestCode, resultCode, data)
+        }
     }
 
 }
